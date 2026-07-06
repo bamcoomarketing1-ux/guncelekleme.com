@@ -89,21 +89,25 @@ class UploadService
 
     public static function mirrorToPublicStorage(string $storedRelativePath): void
     {
-        $storedRelativePath = ltrim(str_replace('\\', '/', $storedRelativePath), '/');
-        $source = storage_path('app/public/'.$storedRelativePath);
-        $dest = public_path('storage/'.$storedRelativePath);
+        try {
+            $storedRelativePath = ltrim(str_replace('\\', '/', $storedRelativePath), '/');
+            $source = storage_path('app/public/'.$storedRelativePath);
+            $dest = public_path('storage/'.$storedRelativePath);
 
-        if (! is_file($source)) {
-            return;
-        }
+            if (! is_file($source)) {
+                return;
+            }
 
-        $destDir = dirname($dest);
-        if (! is_dir($destDir)) {
-            mkdir($destDir, 0755, true);
-        }
+            $destDir = dirname($dest);
+            if (! is_dir($destDir)) {
+                @mkdir($destDir, 0755, true);
+            }
 
-        if (! is_file($dest)) {
-            copy($source, $dest);
+            if (is_dir($destDir) && ! is_file($dest)) {
+                @copy($source, $dest);
+            }
+        } catch (\Throwable $e) {
+            // Railway gibi kısıtlı dosya sistemlerinde hata vermesini engelle
         }
     }
 
@@ -134,22 +138,26 @@ class UploadService
 
     public static function ensurePublicStorage(): void
     {
-        $publicStorage = self::publicStorageRoot();
+        try {
+            $publicStorage = self::publicStorageRoot();
 
-        if (is_link($publicStorage)) {
-            if (is_dir($publicStorage)) {
-                return;
+            if (is_link($publicStorage)) {
+                if (is_dir($publicStorage)) {
+                    return;
+                }
+
+                @unlink($publicStorage);
             }
 
-            @unlink($publicStorage);
-        }
+            if (file_exists($publicStorage) && ! is_dir($publicStorage)) {
+                @unlink($publicStorage);
+            }
 
-        if (file_exists($publicStorage) && ! is_dir($publicStorage)) {
-            @unlink($publicStorage);
-        }
-
-        if (! is_dir($publicStorage)) {
-            @mkdir($publicStorage, 0755, true);
+            if (! is_dir($publicStorage)) {
+                @mkdir($publicStorage, 0755, true);
+            }
+        } catch (\Throwable $e) {
+            // Hata yut, Railway üzerinde çökmeyi engelle
         }
     }
 
