@@ -1,0 +1,38 @@
+# Bağımlılıklar (imaj içinde yeniden kurulur)
+/vendor
+/node_modules
+
+# Ortam & sırlar
+.env
+.env.*
+!.env.example
+
+# Yerel SQLite (Railway'de MySQL kullanılır)
+/database/database.sqlite
+
+# Build çıktıları (imaj içinde yeniden üretilir)
+/public/build
+/public/hot
+
+# Git & IDE
+.git
+.gitignore
+.idea
+.vscode
+.zed
+
+# Loglar & cache
+/storage/logs/*
+/storage/framework/cache/data/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+.phpunit.result.cache
+/.phpunit.cache
+
+# Testler & dev scriptleri (opsiyonel, imaj boyutunu küçültür)
+/tests
+
+# Docker/CI dosyaları
+Dockerfile
+.dockerignore
+docker-compose.yml

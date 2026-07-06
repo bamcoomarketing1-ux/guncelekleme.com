@@ -1,0 +1,24 @@
+{
+  "site": "https://alisulasyon51.com",
+  "api": "https://alijhgfdjhgjhdfhjgdfjhgjdfg.site/api",
+  "findings": [
+    {
+      "severity": "critical",
+      "issue": "POST /settings auth gerektirmiyor — herkes site ayarını değiştirebilir"
+    }
+  ],
+  "frontend_status": 200,
+  "title_blonk": true,
+  "js_remote_api_exposed": false,
+  "public_settings": 200,
+  "public_banners": 200,
+  "public_leaderboard": 200,
+  "admin_users_unauth": 500,
+  "admin_dashboard_unauth": 500,
+  "settings_post_unauth": 200,
+  "admin_login_test": {
+    "status": 200,
+    "has_token": false
+  },
+  "verify_email_invalid_token": 422
+}
