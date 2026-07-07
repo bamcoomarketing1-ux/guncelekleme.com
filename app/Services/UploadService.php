@@ -72,6 +72,22 @@ class UploadService
 
         self::mirrorToPublicStorage($stored);
 
+        // Railway gibi kısıtlı ortamlarda public/storage'a da direkt yaz
+        try {
+            $storedRelPath = ltrim(str_replace('\\', '/', $stored), '/');
+            $pubStorageDest = public_path('storage/'.$storedRelPath);
+            $pubStorageDir = dirname($pubStorageDest);
+            if (! is_dir($pubStorageDir)) {
+                @mkdir($pubStorageDir, 0755, true);
+            }
+            $source = storage_path('app/public/'.$storedRelPath);
+            if (is_file($source) && ! is_file($pubStorageDest)) {
+                @copy($source, $pubStorageDest);
+            }
+        } catch (\Throwable $e) {
+            // Hata yut
+        }
+
         return '/storage/'.$stored;
     }
 

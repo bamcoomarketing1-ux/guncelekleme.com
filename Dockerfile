@@ -66,8 +66,10 @@ COPY --from=assets /app/public/build ./public/build
 
 # Autoload'u tamamla ve izinleri ayarla
 RUN composer dump-autoload --optimize --no-dev --no-interaction && \
-    chown -R www-data:www-data storage bootstrap/cache && \
-    chmod -R ug+rwx storage bootstrap/cache
+    mkdir -p storage/app/public storage/framework/sessions storage/framework/views storage/framework/cache storage/logs bootstrap/cache && \
+    mkdir -p public/storage && \
+    chown -R www-data:www-data storage bootstrap/cache public/storage && \
+    chmod -R ug+rwx storage bootstrap/cache public/storage
 
 # nginx + supervisor + entrypoint yapılandırmaları
 COPY docker/nginx.conf.template /etc/nginx/templates/default.conf.template
