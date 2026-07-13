@@ -4,129 +4,388 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lig & Takım Yönetimi | Admin Panel</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        darkBg: '#070708',
-                        darkCard: '#121214',
-                        darkBorder: '#1c1c1e',
-                        primary: '#10b981', // Emerald green from Nexuv1
-                    }
-                }
-            }
-        }
-    </script>
     <!-- Google Fonts Outfit -->
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
+        /* Vanilla CSS - CSP Safe (No external dependencies except fonts) */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
         body {
             font-family: 'Outfit', sans-serif;
             background-color: #070708;
             color: #f3f4f6;
+            line-height: 1.5;
+            padding-bottom: 3rem;
         }
-        /* Custom scrollbar */
-        ::-webkit-scrollbar {
-            width: 6px;
+        header {
+            border-b: 1px solid #1c1c1e;
+            background-color: rgba(7, 7, 8, 0.85);
+            backdrop-filter: blur(8px);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #1c1c1e;
         }
-        ::-webkit-scrollbar-track {
-            background: #070708;
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
         }
-        ::-webkit-scrollbar-thumb {
-            background: #1c1c1e;
-            border-radius: 3px;
+        .btn-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.4rem 0.8rem;
+            border-radius: 0.5rem;
+            background-color: #1c1c1e;
+            border: 1px solid rgba(255,255,255,0.05);
+            color: rgba(255,255,255,0.7);
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.2s;
         }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #10b981;
+        .btn-back:hover {
+            background-color: rgba(255,255,255,0.05);
+            color: #fff;
+        }
+        .title {
+            font-size: 1.25rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            font-style: italic;
+            letter-spacing: -0.05em;
+            color: #fff;
+        }
+        .title span {
+            color: #10b981;
+        }
+        .badge {
+            padding: 0.25rem 0.75rem;
+            font-size: 0.7rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            background-color: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            border-radius: 9999px;
+        }
+        main {
+            max-width: 1200px;
+            margin: 2rem auto 0;
+            padding: 0 1.5rem;
+        }
+        /* Loader */
+        .loader-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 6rem 0;
+            gap: 1rem;
+        }
+        .loader {
+            width: 3rem;
+            height: 3rem;
+            border: 4px solid #10b981;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .loader-text {
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            color: rgba(255,255,255,0.4);
+            text-transform: uppercase;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 0.8; }
+        }
+        .hidden {
+            display: none !important;
+        }
+        /* Tabs */
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #1c1c1e;
+            margin-bottom: 2rem;
+            gap: 0.5rem;
+        }
+        .tab-btn {
+            padding: 0.75rem 1.5rem;
+            font-weight: 900;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: rgba(255,255,255,0.4);
+            text-decoration: none;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+        .tab-btn:hover {
+            color: #fff;
+        }
+        .tab-btn.active {
+            border-color: #10b981;
+            color: #10b981;
+            background-color: rgba(16, 185, 129, 0.05);
+        }
+        /* Grid Layout */
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+        @media (min-width: 1024px) {
+            .grid {
+                grid-template-columns: 1fr 2fr;
+            }
+        }
+        /* Cards */
+        .card {
+            background-color: #121214;
+            border: 1px solid #1c1c1e;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            color: #fff;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .card-title::before {
+            content: '';
+            display: block;
+            width: 0.5rem;
+            height: 0.5rem;
+            border-radius: 50%;
+            background-color: #10b981;
+        }
+        /* Forms */
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+        .form-label {
+            display: block;
+            font-size: 0.65rem;
+            font-weight: 900;
+            color: rgba(255,255,255,0.4);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.5rem;
+        }
+        .form-input {
+            width: 100%;
+            height: 2.75rem;
+            background-color: #070708;
+            border: 1px solid #1c1c1e;
+            border-radius: 0.75rem;
+            padding: 0 1rem;
+            font-size: 0.85rem;
+            color: #fff;
+            transition: border-color 0.2s;
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: rgba(16, 185, 129, 0.5);
+        }
+        .btn-submit {
+            width: 100%;
+            height: 2.75rem;
+            background-color: #10b981;
+            color: #070708;
+            font-weight: 900;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            border: none;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn-submit:hover {
+            background-color: #0d9668;
+        }
+        .btn-submit:active {
+            transform: scale(0.98);
+        }
+        /* Tables */
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+        th {
+            padding-bottom: 0.75rem;
+            font-size: 0.65rem;
+            font-weight: 900;
+            color: rgba(255,255,255,0.4);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            border-bottom: 1px solid #1c1c1e;
+        }
+        td {
+            padding: 1rem 0;
+            border-bottom: 1px solid rgba(28, 28, 30, 0.5);
+            font-size: 0.9rem;
+        }
+        .logo-img {
+            width: 2rem;
+            height: 2rem;
+            border-radius: 0.5rem;
+            object-fit: contain;
+            background-color: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.05);
+            padding: 0.25rem;
+        }
+        .btn-delete {
+            padding: 0.4rem 0.8rem;
+            background-color: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            border-radius: 0.5rem;
+            font-size: 0.7rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-delete:hover {
+            background-color: rgba(239, 68, 68, 0.2);
+        }
+        .btn-delete:active {
+            transform: scale(0.95);
+        }
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.75rem;
+            background-color: #10b981;
+            color: #070708;
+            font-weight: 700;
+            font-size: 0.85rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            transition: all 0.3s transform, opacity;
+            transform: translateY(6rem);
+            opacity: 0;
+            z-index: 100;
+        }
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
         }
     </style>
 </head>
-<body class="min-h-screen bg-darkBg pb-12">
+<body>
     <!-- Navbar / Header -->
-    <header class="border-b border-darkBorder bg-darkBg/80 backdrop-blur sticky top-0 z-50 px-6 py-4 flex items-center justify-between">
-        <div class="flex items-center gap-4">
-            <a href="/panel/dashboard" class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-darkBorder hover:bg-white/5 transition border border-white/5 text-sm font-semibold text-white/70 hover:text-white">
+    <header>
+        <div class="header-left">
+            <a href="/panel/dashboard" class="btn-back">
                 ← Panel'e Dön
             </a>
-            <h1 class="text-xl font-black italic tracking-tighter uppercase text-white leading-none">
-                LİG & TAKIM <span class="text-primary">YÖNETİMİ</span>
+            <h1 class="title">
+                LİG & TAKIM <span>YÖNETİMİ</span>
             </h1>
         </div>
-        <div class="flex items-center gap-2">
-            <span id="admin-badge" class="px-3 py-1 text-xs font-black uppercase tracking-wider bg-primary/10 text-primary border border-primary/20 rounded-full">
+        <div>
+            <span id="admin-badge" class="badge">
                 Sistem Yöneticisi
             </span>
         </div>
     </header>
 
     <!-- Main Container -->
-    <main class="max-w-6xl mx-auto px-6 mt-8">
+    <main>
         <!-- Auth Loading Screen -->
-        <div id="auth-loading" class="flex flex-col items-center justify-center py-24 gap-4">
-            <div class="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-            <p class="text-sm font-semibold tracking-wider text-white/40 uppercase animate-pulse">Yönetici Yetkisi Doğrulanıyor...</p>
+        <div id="auth-loading" class="loader-container">
+            <div class="loader"></div>
+            <p class="loader-text">Yönetici Yetkisi Doğrulanıyor...</p>
         </div>
 
         <!-- Dashboard Content (hidden until authorized) -->
         <div id="dashboard-content" class="hidden">
             <!-- Tabs -->
-            <div class="flex border-b border-darkBorder mb-8 gap-2">
-                <a href="/panel/leagues" class="px-6 py-3 border-b-2 font-black text-sm uppercase tracking-widest transition-all {{ $activeTab === 'leagues' ? 'border-primary text-primary bg-primary/5' : 'border-transparent text-white/40 hover:text-white' }}">
+            <div class="tabs">
+                <a href="/panel/leagues" class="tab-btn {{ $activeTab === 'leagues' ? 'active' : '' }}">
                     🏆 LİGLER
                 </a>
-                <a href="/panel/teams" class="px-6 py-3 border-b-2 font-black text-sm uppercase tracking-widest transition-all {{ $activeTab === 'teams' ? 'border-primary text-primary bg-primary/5' : 'border-transparent text-white/40 hover:text-white' }}">
+                <a href="/panel/teams" class="tab-btn {{ $activeTab === 'teams' ? 'active' : '' }}">
                     ⚽ TAKIMLAR
                 </a>
             </div>
 
             <!-- LEAGUES TAB -->
             @if($activeTab === 'leagues')
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div class="grid">
                 <!-- Create Form -->
-                <div class="lg:col-span-1 bg-darkCard border border-darkBorder rounded-2xl p-6 shadow-2xl h-fit">
-                    <h2 class="text-lg font-black tracking-tight text-white uppercase mb-6 flex items-center gap-2">
-                        <span class="w-2 h-2 rounded-full bg-primary"></span> Yeni Lig Ekle
-                    </h2>
-                    <form id="create-league-form" class="space-y-4">
-                        <div>
-                            <label class="block text-[10px] font-black text-white/40 uppercase tracking-widest mb-1.5">Lig Adı *</label>
-                            <input type="text" id="league-name" required placeholder="Örn: Trendyol Süper Lig" class="w-full h-11 bg-darkBg border border-darkBorder rounded-xl px-4 text-sm text-white focus:outline-none focus:border-primary/50 transition">
+                <div class="card">
+                    <h2 class="card-title">Yeni Lig Ekle</h2>
+                    <form id="create-league-form" onsubmit="handleLeagueSubmit(event)">
+                        <div class="form-group">
+                            <label class="form-label">Lig Adı *</label>
+                            <input type="text" id="league-name" required placeholder="Örn: Trendyol Süper Lig" class="form-input">
                         </div>
-                        <div>
-                            <label class="block text-[10px] font-black text-white/40 uppercase tracking-widest mb-1.5">Ülke</label>
-                            <input type="text" id="league-country" placeholder="Örn: Türkiye" class="w-full h-11 bg-darkBg border border-darkBorder rounded-xl px-4 text-sm text-white focus:outline-none focus:border-primary/50 transition">
+                        <div class="form-group">
+                            <label class="form-label">Ülke</label>
+                            <input type="text" id="league-country" placeholder="Örn: Türkiye" class="form-input">
                         </div>
-                        <div>
-                            <label class="block text-[10px] font-black text-white/40 uppercase tracking-widest mb-1.5">Lig Logosu (URL)</label>
-                            <input type="url" id="league-logo" placeholder="https://..." class="w-full h-11 bg-darkBg border border-darkBorder rounded-xl px-4 text-sm text-white focus:outline-none focus:border-primary/50 transition">
+                        <div class="form-group">
+                            <label class="form-label">Lig Logosu (URL)</label>
+                            <input type="url" id="league-logo" placeholder="https://..." class="form-input">
                         </div>
-                        <button type="submit" class="w-full h-11 bg-primary text-darkBg font-black uppercase tracking-widest text-xs rounded-xl hover:bg-primary/95 transition active:scale-95 flex items-center justify-center gap-2">
+                        <button type="submit" class="btn-submit">
                             Lig Ekle 🚀
                         </button>
                     </form>
                 </div>
 
                 <!-- Leagues List -->
-                <div class="lg:col-span-2 bg-darkCard border border-darkBorder rounded-2xl p-6 shadow-2xl">
-                    <h2 class="text-lg font-black tracking-tight text-white uppercase mb-6 flex items-center gap-2">
-                        <span class="w-2 h-2 rounded-full bg-primary"></span> Mevcut Ligler
-                    </h2>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse">
+                <div class="card">
+                    <h2 class="card-title">Mevcut Ligler</h2>
+                    <div class="table-responsive">
+                        <table>
                             <thead>
-                                <tr class="border-b border-darkBorder text-[10px] font-black text-white/40 uppercase tracking-wider">
-                                    <th class="pb-3 w-16">Logo</th>
-                                    <th class="pb-3">Lig Adı</th>
-                                    <th class="pb-3">Ülke</th>
-                                    <th class="pb-3 text-right">İşlem</th>
+                                <tr>
+                                    <th style="width: 3.5rem;">Logo</th>
+                                    <th>Lig Adı</th>
+                                    <th>Ülke</th>
+                                    <th style="text-align: right;">İşlem</th>
                                 </tr>
                             </thead>
-                            <tbody id="leagues-table-body" class="divide-y divide-darkBorder/50">
+                            <tbody id="leagues-table-body">
                                 <tr>
-                                    <td colspan="4" class="py-8 text-center text-sm text-white/20">Ligler yükleniyor...</td>
+                                    <td colspan="4" style="text-align: center; color: rgba(255,255,255,0.2); padding: 2rem 0;">Ligler yükleniyor...</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -137,51 +396,47 @@
 
             <!-- TEAMS TAB -->
             @if($activeTab === 'teams')
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div class="grid">
                 <!-- Create Form -->
-                <div class="lg:col-span-1 bg-darkCard border border-darkBorder rounded-2xl p-6 shadow-2xl h-fit">
-                    <h2 class="text-lg font-black tracking-tight text-white uppercase mb-6 flex items-center gap-2">
-                        <span class="w-2 h-2 rounded-full bg-primary"></span> Yeni Takım Ekle
-                    </h2>
-                    <form id="create-team-form" class="space-y-4">
-                        <div>
-                            <label class="block text-[10px] font-black text-white/40 uppercase tracking-widest mb-1.5">Bağlı Olduğu Lig *</label>
-                            <select id="team-league-id" required class="w-full h-11 bg-darkBg border border-darkBorder rounded-xl px-4 text-sm text-white focus:outline-none focus:border-primary/50 transition">
+                <div class="card">
+                    <h2 class="card-title">Yeni Takım Ekle</h2>
+                    <form id="create-team-form" onsubmit="handleTeamSubmit(event)">
+                        <div class="form-group">
+                            <label class="form-label">Bağlı Olduğu Lig *</label>
+                            <select id="team-league-id" required class="form-input">
                                 <option value="" disabled selected>Lig Seçiniz</option>
                             </select>
                         </div>
-                        <div>
-                            <label class="block text-[10px] font-black text-white/40 uppercase tracking-widest mb-1.5">Takım Adı *</label>
-                            <input type="text" id="team-name" required placeholder="Örn: Galatasaray" class="w-full h-11 bg-darkBg border border-darkBorder rounded-xl px-4 text-sm text-white focus:outline-none focus:border-primary/50 transition">
+                        <div class="form-group">
+                            <label class="form-label">Takım Adı *</label>
+                            <input type="text" id="team-name" required placeholder="Örn: Galatasaray" class="form-input">
                         </div>
-                        <div>
-                            <label class="block text-[10px] font-black text-white/40 uppercase tracking-widest mb-1.5">Takım Logosu (URL)</label>
-                            <input type="url" id="team-logo" placeholder="https://..." class="w-full h-11 bg-darkBg border border-darkBorder rounded-xl px-4 text-sm text-white focus:outline-none focus:border-primary/50 transition">
+                        <div class="form-group">
+                            <label class="form-label">Takım Logosu (URL)</label>
+                            <input type="url" id="team-logo" placeholder="https://..." class="form-input">
                         </div>
-                        <button type="submit" class="w-full h-11 bg-primary text-darkBg font-black uppercase tracking-widest text-xs rounded-xl hover:bg-primary/95 transition active:scale-95 flex items-center justify-center gap-2">
+                        <button type="submit" class="btn-submit">
                             Takım Ekle 🚀
                         </button>
                     </form>
                 </div>
 
                 <!-- Teams List -->
-                <div class="lg:col-span-2 bg-darkCard border border-darkBorder rounded-2xl p-6 shadow-2xl">
-                    <h2 class="text-lg font-black tracking-tight text-white uppercase mb-6 flex items-center gap-2">
-                        <span class="w-2 h-2 rounded-full bg-primary"></span> Mevcut Takımlar
-                    </h2>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse">
+                <div class="card">
+                    <h2 class="card-title">Mevcut Takımlar</h2>
+                    <div class="table-responsive">
+                        <table>
                             <thead>
-                                <tr class="border-b border-darkBorder text-[10px] font-black text-white/40 uppercase tracking-wider">
-                                    <th class="pb-3 w-16">Logo</th>
-                                    <th class="pb-3">Takım Adı</th>
-                                    <th class="pb-3">Bağlı Olduğu Lig</th>
-                                    <th class="pb-3 text-right">İşlem</th>
+                                <tr>
+                                    <th style="width: 3.5rem;">Logo</th>
+                                    <th>Takım Adı</th>
+                                    <th>Bağlı Olduğu Lig</th>
+                                    <th style="text-align: right;">İşlem</th>
                                 </tr>
                             </thead>
-                            <tbody id="teams-table-body" class="divide-y divide-darkBorder/50">
+                            <tbody id="teams-table-body">
                                 <tr>
-                                    <td colspan="4" class="py-8 text-center text-sm text-white/20">Takımlar yükleniyor...</td>
+                                    <td colspan="4" style="text-align: center; color: rgba(255,255,255,0.2); padding: 2rem 0;">Takımlar yükleniyor...</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -193,7 +448,7 @@
     </main>
 
     <!-- Notification Toast -->
-    <div id="toast" class="fixed bottom-6 right-6 px-5 py-3 rounded-xl bg-primary text-darkBg font-bold shadow-2xl transition-all duration-300 transform translate-y-24 opacity-0 z-50 text-sm">
+    <div id="toast" class="toast">
         İşlem başarılı!
     </div>
 
@@ -208,19 +463,19 @@
             const toast = document.getElementById('toast');
             toast.textContent = message;
             if (isError) {
-                toast.classList.remove('bg-primary', 'text-darkBg');
-                toast.classList.add('bg-red-500', 'text-white');
+                toast.style.backgroundColor = '#ef4444';
+                toast.style.color = '#fff';
             } else {
-                toast.classList.remove('bg-red-500', 'text-white');
-                toast.classList.add('bg-primary', 'text-darkBg');
+                toast.style.backgroundColor = '#10b981';
+                toast.style.color = '#070708';
             }
-            toast.classList.remove('translate-y-24', 'opacity-0');
+            toast.classList.add('show');
             setTimeout(() => {
-                toast.classList.add('translate-y-24', 'opacity-0');
+                toast.classList.remove('show');
             }, 3000);
         }
 
-        // Search localStorage for Sanctum token
+        // Search localStorage for Sanctum token (matches any sanctum format token)
         function findToken() {
             for (let i = 0; i < localStorage.length; i++) {
                 const key = localStorage.key(i);
@@ -302,24 +557,40 @@
                 const leagues = result.data || [];
                 
                 if (leagues.length === 0) {
-                    tableBody.innerHTML = `<tr><td colspan="4" class="py-8 text-center text-sm text-white/20">Sisteme henüz hiç lig girilmemiş.</td></tr>`;
+                    tableBody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: rgba(255,255,255,0.2); padding: 2rem 0;">Sisteme henüz hiç lig girilmemiş.</td></tr>`;
                     return;
                 }
 
                 tableBody.innerHTML = leagues.map(league => `
-                    <tr class="hover:bg-white/[0.01] transition">
-                        <td class="py-4">
-                            <img src="${league.logo_url || '/placeholder.png'}" onerror="this.src='/placeholder.png'" class="w-8 h-8 rounded-lg object-contain bg-white/5 border border-white/5 p-1" />
+                    <tr>
+                        <td>
+                            <img src="${league.logo_url || '/placeholder.png'}" onerror="this.src='/placeholder.png'" class="logo-img" />
                         </td>
-                        <td class="py-4 font-semibold text-white">${escapeHtml(league.name)}</td>
-                        <td class="py-4 text-white/60">${escapeHtml(league.country || '-')}</td>
-                        <td class="py-4 text-right">
-                            <button onclick="deleteLeague(${league.id})" class="px-3 py-1.5 bg-red-500/10 text-red-500 border border-red-500/20 text-xs font-black uppercase tracking-wider rounded-lg hover:bg-red-500/20 active:scale-95 transition">
+                        <td style="font-weight: 600; color: #fff;">${escapeHtml(league.name)}</td>
+                        <td style="color: rgba(255,255,255,0.6);">${escapeHtml(league.country || '-')}</td>
+                        <td style="text-align: right;">
+                            <button onclick="deleteLeague(${league.id})" class="btn-delete">
                                 Sil
                             </button>
                         </td>
                     </tr>
                 `).join('');
+            } catch (error) {
+                showToast(error.message, true);
+            }
+        }
+
+        async function handleLeagueSubmit(e) {
+            e.preventDefault();
+            const name = document.getElementById('league-name').value;
+            const country = document.getElementById('league-country').value;
+            const logo_url = document.getElementById('league-logo').value;
+
+            try {
+                await apiRequest('/api/admin/leagues', 'POST', { name, country, logo_url, is_active: true });
+                showToast('Lig başarıyla eklendi!');
+                document.getElementById('create-league-form').reset();
+                loadLeagues();
             } catch (error) {
                 showToast(error.message, true);
             }
@@ -353,24 +624,40 @@
                 const teams = teamsResult.data || [];
 
                 if (teams.length === 0) {
-                    tableBody.innerHTML = `<tr><td colspan="4" class="py-8 text-center text-sm text-white/20">Sisteme henüz hiç takım girilmemiş.</td></tr>`;
+                    tableBody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: rgba(255,255,255,0.2); padding: 2rem 0;">Sisteme henüz hiç takım girilmemiş.</td></tr>`;
                     return;
                 }
 
                 tableBody.innerHTML = teams.map(team => `
-                    <tr class="hover:bg-white/[0.01] transition">
-                        <td class="py-4">
-                            <img src="${team.logo_url || '/placeholder.png'}" onerror="this.src='/placeholder.png'" class="w-8 h-8 rounded-lg object-contain bg-white/5 border border-white/5 p-1" />
+                    <tr>
+                        <td>
+                            <img src="${team.logo_url || '/placeholder.png'}" onerror="this.src='/placeholder.png'" class="logo-img" />
                         </td>
-                        <td class="py-4 font-semibold text-white">${escapeHtml(team.name)}</td>
-                        <td class="py-4 text-white/60">${escapeHtml(team.league ? team.league.name : '-')}</td>
-                        <td class="py-4 text-right">
-                            <button onclick="deleteTeam(${team.id})" class="px-3 py-1.5 bg-red-500/10 text-red-500 border border-red-500/20 text-xs font-black uppercase tracking-wider rounded-lg hover:bg-red-500/20 active:scale-95 transition">
+                        <td style="font-weight: 600; color: #fff;">${escapeHtml(team.name)}</td>
+                        <td style="color: rgba(255,255,255,0.6);">${escapeHtml(team.league ? team.league.name : '-')}</td>
+                        <td style="text-align: right;">
+                            <button onclick="deleteTeam(${team.id})" class="btn-delete">
                                 Sil
                             </button>
                         </td>
                     </tr>
                 `).join('');
+            } catch (error) {
+                showToast(error.message, true);
+            }
+        }
+
+        async function handleTeamSubmit(e) {
+            e.preventDefault();
+            const league_id = document.getElementById('team-league-id').value;
+            const name = document.getElementById('team-name').value;
+            const logo_url = document.getElementById('team-logo').value;
+
+            try {
+                await apiRequest('/api/admin/teams', 'POST', { league_id, name, logo_url, is_active: true });
+                showToast('Takım başarıyla eklendi!');
+                document.getElementById('create-team-form').reset();
+                loadTeamsAndLeagues();
             } catch (error) {
                 showToast(error.message, true);
             }
@@ -387,51 +674,8 @@
             }
         }
 
-        // Form Submissions
-        document.addEventListener('DOMContentLoaded', () => {
-            // Verify access
-            verifyAdmin();
-
-            // League Form Submit
-            const leagueForm = document.getElementById('create-league-form');
-            if (leagueForm) {
-                leagueForm.addEventListener('submit', async (e) => {
-                    e.preventDefault();
-                    const name = document.getElementById('league-name').value;
-                    const country = document.getElementById('league-country').value;
-                    const logo_url = document.getElementById('league-logo').value;
-
-                    try {
-                        await apiRequest('/api/admin/leagues', 'POST', { name, country, logo_url, is_active: true });
-                        showToast('Lig başarıyla eklendi!');
-                        leagueForm.reset();
-                        loadLeagues();
-                    } catch (error) {
-                        showToast(error.message, true);
-                    }
-                });
-            }
-
-            // Team Form Submit
-            const teamForm = document.getElementById('create-team-form');
-            if (teamForm) {
-                teamForm.addEventListener('submit', async (e) => {
-                    e.preventDefault();
-                    const league_id = document.getElementById('team-league-id').value;
-                    const name = document.getElementById('team-name').value;
-                    const logo_url = document.getElementById('team-logo').value;
-
-                    try {
-                        await apiRequest('/api/admin/teams', 'POST', { league_id, name, logo_url, is_active: true });
-                        showToast('Takım başarıyla eklendi!');
-                        teamForm.reset();
-                        loadTeamsAndLeagues();
-                    } catch (error) {
-                        showToast(error.message, true);
-                    }
-                });
-            }
-        });
+        // Initialize verification
+        verifyAdmin();
 
         // Escaper helper to prevent XSS
         function escapeHtml(text) {
