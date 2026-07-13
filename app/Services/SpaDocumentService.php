@@ -94,28 +94,34 @@ class SpaDocumentService
 (function() {
     function injectLinks() {
         if (!window.location.pathname.startsWith('/panel')) return;
-        const links = Array.from(document.querySelectorAll('a, button, div, span'));
-        const ozelOran = links.find(el => el.textContent && el.textContent.trim() === 'Özel Oran Yönetimi');
-        if (!ozelOran) return;
-
-        const anchor = ozelOran.closest('a');
+        
+        // Find anchor pointing to special-odds
+        const anchor = Array.from(document.querySelectorAll('a')).find(a => {
+            const href = a.getAttribute('href');
+            return href && href.includes('special-odds');
+        });
+        
         if (!anchor || document.getElementById('custom-league-link')) return;
 
-        // Lig Yönetimi
-        const leagueLink = anchor.cloneNode(true);
-        leagueLink.id = 'custom-league-link';
-        leagueLink.href = '/panel/leagues';
-        leagueLink.classList.remove('bg-emerald-500/10', 'text-emerald-500');
-        const lText = Array.from(leagueLink.querySelectorAll('span, div, p')).find(el => el.textContent.trim() === 'Özel Oran Yönetimi');
-        if (lText) lText.textContent = 'Lig Yönetimi';
+        // Helper to replace text in cloned element
+        function customizeLink(clone, id, href, text) {
+            clone.id = id;
+            clone.setAttribute('href', href);
+            // Remove active classes
+            clone.classList.remove('bg-emerald-500/10', 'text-emerald-500', 'router-link-active', 'router-link-exact-active');
+            
+            // Find any child with text "Özel Oran" and change it
+            const textNodes = Array.from(clone.querySelectorAll('*')).filter(el => el.children.length === 0);
+            textNodes.forEach(node => {
+                if (node.textContent.includes('Özel Oran')) {
+                    node.textContent = text;
+                }
+            });
+            return clone;
+        }
 
-        // Takım Yönetimi
-        const teamLink = anchor.cloneNode(true);
-        teamLink.id = 'custom-team-link';
-        teamLink.href = '/panel/teams';
-        teamLink.classList.remove('bg-emerald-500/10', 'text-emerald-500');
-        const tText = Array.from(teamLink.querySelectorAll('span, div, p')).find(el => el.textContent.trim() === 'Özel Oran Yönetimi');
-        if (tText) tText.textContent = 'Takım Yönetimi';
+        const leagueLink = customizeLink(anchor.cloneNode(true), 'custom-league-link', '/panel/leagues', 'Lig Yönetimi');
+        const teamLink = customizeLink(anchor.cloneNode(true), 'custom-team-link', '/panel/teams', 'Takım Yönetimi');
 
         anchor.parentNode.insertBefore(leagueLink, anchor.nextSibling);
         leagueLink.parentNode.insertBefore(teamLink, leagueLink.nextSibling);
