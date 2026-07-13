@@ -247,6 +247,25 @@ class ResourceController extends Controller
         }
 
         if ($resource === 'special-odds') {
+            if (empty($data['title'])) {
+                $homeTeamName = 'Ev Sahibi';
+                $awayTeamName = 'Deplasman';
+                
+                if (!empty($data['home_team_id'])) {
+                    $home = \App\Models\Team::find($data['home_team_id']);
+                    if ($home) {
+                        $homeTeamName = $home->name;
+                    }
+                }
+                if (!empty($data['away_team_id'])) {
+                    $away = \App\Models\Team::find($data['away_team_id']);
+                    if ($away) {
+                        $awayTeamName = $away->name;
+                    }
+                }
+                $data['title'] = $homeTeamName . ' vs ' . $awayTeamName;
+            }
+
             if (isset($data['odd_value']) && ! isset($data['odds'])) {
                 $data['odds'] = $data['odd_value'];
             }
