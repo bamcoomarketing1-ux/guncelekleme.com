@@ -20,4 +20,14 @@ class SpaController extends Controller
             'Content-Type' => 'application/json; charset=UTF-8',
         ]);
     }
+
+    public function adminLeagues(): \Illuminate\Contracts\View\View
+    {
+        return view('admin.sports_manager', ['activeTab' => 'leagues']);
+    }
+
+    public function adminTeams(): \Illuminate\Contracts\View\View
+    {
+        return view('admin.sports_manager', ['activeTab' => 'teams']);
+    }
 }

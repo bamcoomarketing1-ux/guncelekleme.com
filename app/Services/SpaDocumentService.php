@@ -88,6 +88,52 @@ class SpaDocumentService
             $html = str_replace('</head>', $panelFixCss.'</head>', $html);
         }
 
+        // Sidebar link enjeksiyonu ve token doğrulama scripti
+        $sidebarScript = <<<'HTML'
+<script id="panel-sidebar-inject">
+(function() {
+    function injectLinks() {
+        if (!window.location.pathname.startsWith('/panel')) return;
+        const links = Array.from(document.querySelectorAll('a, button, div, span'));
+        const ozelOran = links.find(el => el.textContent && el.textContent.trim() === 'Özel Oran Yönetimi');
+        if (!ozelOran) return;
+
+        const anchor = ozelOran.closest('a');
+        if (!anchor || document.getElementById('custom-league-link')) return;
+
+        // Lig Yönetimi
+        const leagueLink = anchor.cloneNode(true);
+        leagueLink.id = 'custom-league-link';
+        leagueLink.href = '/panel/leagues';
+        leagueLink.classList.remove('bg-emerald-500/10', 'text-emerald-500');
+        const lText = Array.from(leagueLink.querySelectorAll('span, div, p')).find(el => el.textContent.trim() === 'Özel Oran Yönetimi');
+        if (lText) lText.textContent = 'Lig Yönetimi';
+
+        // Takım Yönetimi
+        const teamLink = anchor.cloneNode(true);
+        teamLink.id = 'custom-team-link';
+        teamLink.href = '/panel/teams';
+        teamLink.classList.remove('bg-emerald-500/10', 'text-emerald-500');
+        const tText = Array.from(teamLink.querySelectorAll('span, div, p')).find(el => el.textContent.trim() === 'Özel Oran Yönetimi');
+        if (tText) tText.textContent = 'Takım Yönetimi';
+
+        anchor.parentNode.insertBefore(leagueLink, anchor.nextSibling);
+        leagueLink.parentNode.insertBefore(teamLink, leagueLink.nextSibling);
+    }
+
+    const observer = new MutationObserver((mutations) => {
+        injectLinks();
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+    window.addEventListener('load', injectLinks);
+})();
+</script>
+HTML;
+
+        if (! str_contains($html, 'panel-sidebar-inject')) {
+            $html = str_replace('</body>', $sidebarScript."\n</body>", $html);
+        }
+
         return $html;
     }
 }

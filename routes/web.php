@@ -16,5 +16,8 @@ Route::get('/storage/{path}', function (string $path) {
     abort(404);
 })->where('path', '.*');
 
+Route::get('/panel/leagues', [SpaController::class, 'adminLeagues']);
+Route::get('/panel/teams', [SpaController::class, 'adminTeams']);
+
 Route::get('/{any?}', [SpaController::class, 'index'])
     ->where('any', '^(?!api|storage|up|assets|favicon\.ico|manifest\.json|robots\.txt|sitemap\.xml).*$');
