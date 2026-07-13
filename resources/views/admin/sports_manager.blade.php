@@ -7,7 +7,7 @@
     <!-- Google Fonts Outfit -->
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
-        /* Vanilla CSS - CSP Safe (No external dependencies except fonts) */
+        /* Vanilla CSS */
         * {
             box-sizing: border-box;
             margin: 0;
@@ -21,7 +21,7 @@
             padding-bottom: 3rem;
         }
         header {
-            border-b: 1px solid #1c1c1e;
+            border-bottom: 1px solid #1c1c1e;
             background-color: rgba(7, 7, 8, 0.85);
             backdrop-filter: blur(8px);
             position: sticky;
@@ -31,7 +31,6 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            border-bottom: 1px solid #1c1c1e;
         }
         .header-left {
             display: flex;
@@ -109,11 +108,9 @@
             letter-spacing: 0.05em;
             color: rgba(255,255,255,0.4);
             text-transform: uppercase;
-            animation: pulse 1.5s ease-in-out infinite;
-        }
-        @keyframes pulse {
-            0%, 100% { opacity: 0.4; }
-            50% { opacity: 0.8; }
+            text-align: center;
+            max-width: 500px;
+            word-wrap: break-word;
         }
         .hidden {
             display: none !important;
@@ -330,7 +327,7 @@
         <!-- Auth Loading Screen -->
         <div id="auth-loading" class="loader-container">
             <div class="loader"></div>
-            <p class="loader-text">Yönetici Yetkisi Doğrulanıyor...</p>
+            <p class="loader-text" id="loader-status">Yönetici Yetkisi Doğrulanıyor...</p>
         </div>
 
         <!-- Dashboard Content (hidden until authorized) -->
@@ -475,27 +472,50 @@
             }, 3000);
         }
 
-        // Search localStorage for Sanctum token (matches any sanctum format token)
+        // Show error status on page
+        function showPageError(message) {
+            const statusEl = document.getElementById('loader-status');
+            if (statusEl) {
+                statusEl.style.color = '#ef4444';
+                statusEl.innerHTML = '<strong>HATA:</strong> ' + escapeHtml(message) + '<br><br><span style="font-size: 11px; text-transform: none; color: #fff;">Lütfen admin panelinden çıkış yapıp tekrar giriş yapmayı deneyin.</span>';
+            }
+        }
+
+        // Search localStorage for Sanctum token
         function findToken() {
-            for (let i = 0; i < localStorage.length; i++) {
-                const key = localStorage.key(i);
+            // 1. Try direct keys
+            const commonKeys = ['token', 'admin_token', 'auth_token', 'user_token'];
+            for (const key of commonKeys) {
                 const val = localStorage.getItem(key);
-                if (/^\d+\|[A-Za-z0-9]{40,}/.test(val)) {
+                if (val && (val.includes('|') || val.length > 20)) {
                     return val;
                 }
+            }
+            // 2. Scan all keys for Sanctum structure (number followed by pipe)
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                try {
+                    const val = localStorage.getItem(key);
+                    if (val && /^\d+\|[A-Za-z0-9_-]+/.test(val)) {
+                        return val;
+                    }
+                } catch (e) {}
             }
             return null;
         }
 
         // Verify Admin Access
         async function verifyAdmin() {
-            authToken = findToken();
-            if (!authToken) {
-                window.location.href = '/panel/login';
-                return;
-            }
-
             try {
+                authToken = findToken();
+                if (!authToken) {
+                    showPageError("Yönetici anahtarı (token) tarayıcıda bulunamadı.");
+                    setTimeout(() => {
+                        window.location.href = '/panel/login';
+                    }, 2000);
+                    return;
+                }
+
                 const response = await fetch('/api/admin/me', {
                     headers: {
                         'Authorization': `Bearer ${authToken}`,
@@ -504,7 +524,8 @@
                 });
 
                 if (!response.ok) {
-                    throw new Error('Unauthorized');
+                    const errData = await response.json().catch(() => ({}));
+                    throw new Error(errData.message || `Yetkilendirme başarısız (${response.status})`);
                 }
 
                 const result = await response.json();
@@ -522,8 +543,7 @@
                 }
             } catch (error) {
                 console.error(error);
-                localStorage.removeItem('token');
-                window.location.href = '/panel/login';
+                showPageError(error.message);
             }
         }
 
